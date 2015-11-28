@@ -10,7 +10,7 @@ Create, query, and access Visual Studio Team Services work items from within Vis
 * Quickly open a work item that is returned by your work item query.
 
 ## Configuration 
-In order for the extension to access your Visual Studio Team Servies account you need to provide the account name, the team project name, and a [personal access token](https://www.visualstudio.com/en-us/news/2015-jul-7-vso.aspx). After installing the extension, open your settings.json (*Preferences: Open user settings* in the [command palette](https://code.visualstudio.com/Docs/editor/codebasics#_command-palette)) and add the following section:
+In order for the extension to access your Visual Studio Team Servies account you need to provide the account name, the team project name, and a [personal access token](https://www.visualstudio.com/en-us/news/2015-jul-7-vso.aspx). After installing the extension, open your settings.json (type *Preferences: Open user settings* in the [command palette](https://code.visualstudio.com/Docs/editor/codebasics#_command-palette)) and add the following section and restart Visual Studio Code:
 ```
 {
 	// Visual Studio Team Services account (Ex: contoso.visualstudio.com).
