@@ -1,0 +1,59 @@
+{
+	"name": "vscode-vsts-workitems",
+	"displayName": "Visual Studio Team Services work item management.",
+	"description": "Visual Studio Code extension to manipulate Visual Studio Team Services work items.",
+	"version": "0.0.1",
+	"publisher": "lszomoru",
+	"engines": {
+		"vscode": "^0.10.1"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": ["*"],
+	"main": "./out/src/extension",
+	"contributes": {
+		"commands": [
+			{
+				"command": "extension.createVSTSWorkItem",
+				"title": "Create Visual Studio Team Services work item."
+			},
+			{
+				"command": "extension.queryVSTSWorkItems",
+				"title": "Query Visual Studio Team Services work items."
+			},
+			{
+				"command": "extension.openVSTSPortal",
+				"title": "Open Visual Studio Team Services portal."
+			}],
+		"configuration": {
+			"type": "object",
+			"title": "Visual Studio Team Services account settings",
+			"properties": {
+				"vsts.account": {
+					"type": "string",
+          			"default": "",
+          			"description": "Visual Studio Team Services account (Ex: contoso.visualstudio.com)."
+				},
+				"vsts.pat": {
+					"type": "string",
+          			"default": "",
+          			"description": "Visual Studio Team Services personal access token."
+				},				
+				"vsts.teamProject": {
+					"type": "string",
+          			"default": "",
+          			"description": "Visual Studio Team Services team project name."
+				}				
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
+		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+	},
+	"devDependencies": {
+		"typescript": "^1.6.2",
+		"vscode": "0.10.x"
+	}
+}
