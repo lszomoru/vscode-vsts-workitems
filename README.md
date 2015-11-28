@@ -26,4 +26,4 @@ In order for the extension to access your Visual Studio Team Servies account you
 
 
 ## License
-MIT. For more details check [LICENSE] (LICENSE).
+MIT. For more details check [LICENSE](LICENSE).
