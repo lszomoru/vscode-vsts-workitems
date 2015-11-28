@@ -44,7 +44,8 @@ export class WorkItemService {
 								var newWorkItem = [{ op: "add", path: "/fields/" + Constants.fieldTitle, value: title }];
 								_self._vstsClient.createWorkItem(newWorkItem, _self._vstsTeamProject, workItemType, function(err, workItem) {
 									if (err) {
-										vscode.window.showErrorMessage("Unable to create Visual Studio Team Services work item. Please try again later.");
+										console.log("ERROR: " + err.message);
+										vscode.window.showErrorMessage(Constants.errorCreateWorkItem + " " + Constants.errorHint);
 									} else {
 										vscode.window.showInformationMessage("Visual Studio Team Services work item " +  workItem.id + " created successfully.");
 									}
@@ -66,11 +67,13 @@ export class WorkItemService {
 		// Get the list of queries from the "My Queries" folder
 		vscode.window.showQuickPick(this.queryWorkItemQueries())
 			.then(function (query) {
-				// Execute the selected query and display the results
-				vscode.window.showQuickPick(_self.execWorkItemQuery(query.wiql))
-					.then(function (workItem) {
-						_self.openWorkItem(workItem.id);
-					});
+				if (query != undefined) {
+					// Execute the selected query and display the results
+					vscode.window.showQuickPick(_self.execWorkItemQuery(query.wiql))
+						.then(function (workItem) {
+							_self.openWorkItem(workItem.id);
+						});
+				}
 			});
 	}
 
@@ -81,12 +84,16 @@ export class WorkItemService {
 			// Execute the wiql and get the work item ids
 			_self._vstsClient.getWorkItemIds(wiql, _self._vstsTeamProject, function(err, workItemIds) {
 				if (err) {
-					reject(err);
+					console.log("ERROR: " + err.message);
+					vscode.window.showErrorMessage(Constants.errorExecuteWorkItemQuery + " " + Constants.errorHint);
+					resolve([]);
 				} else {
 					// Get the work item details
 					_self._vstsClient.getWorkItemsById(workItemIds, [Constants.fieldId, Constants.fieldTitle, Constants.fieldWorkItemType], function (err, workItems) {
 						if (err) {
-							reject(err);
+							console.log("ERROR: " + err.message);
+							vscode.window.showErrorMessage(Constants.errorGetWorkItemDetails + " " + Constants.errorHint);
+							resolve([]);
 						} else {
 							var results: Array<WorkItemQuickPickItem> = [];
 							for (var index = 0; index < workItems.length; index++) {
@@ -115,7 +122,9 @@ export class WorkItemService {
 		return new Promise((resolve, reject) => {
 			_self._vstsClient.getQueries(this._vstsTeamProject, 1, "wiql", Constants.queryFolderName, 0, function (err, queries) {
 				if (err) {
-					reject("Unable to get your Visual Studio Team Services work item queries. Please make sure your Visual Studio Team Services settings are corect.");
+					console.log("ERROR: " + err.message);
+					vscode.window.showErrorMessage(Constants.errorWorlItemQueries + " " + Constants.errorHint);
+					resolve(undefined);
 				} else {
 					var results:Array<WorkItemQueryQuickPickItem> = [];
 					for (var index = 0; index < queries.children.length; index++) {
@@ -140,7 +149,9 @@ export class WorkItemService {
 			} else {
 				_self._vstsClient.getWorkItemTypes(_self._vstsTeamProject, function(err, workItemTypes) {
 					if (err) {
-						reject(err);
+						console.log("ERROR: " + err.message);
+						vscode.window.showErrorMessage(Constants.errorWorkItemTypes + " " + Constants.errorHint);
+						resolve(undefined);
 					} else {
 						for (var index = 0; index < workItemTypes.length; index++) {
 							_self._vstsWorkItemTypes.push(workItemTypes[index].name);
