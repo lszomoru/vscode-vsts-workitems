@@ -1,28 +1,28 @@
 import * as vscode from "vscode";
+import { Constants, WorkItemQuickPickItem, WorkItemQueryQuickPickItem } from "./common";
 
 export class WorkItemService {
 	private _vstsClient:any;
 	private _vstsAccount:string;
 	private _vstsPersonalAccessToken:string;
-	private _vstsCollection:string = "DefaultCollection";
 	private _vstsTeamProject:string;
 	private _vstsWorkItemTypes:Array<string> = [];
 
 	constructor() {
 		// Validate/load settings
-		this._vstsAccount = this.validateSettings("vsts.account", "Please specify the name of the Visual Studio Team Services account in your settings.json. (vsts.account)");
-		this._vstsPersonalAccessToken = this.validateSettings("vsts.pat", "Please specify the personal access token that has access to your the Visual Studio Team Services account in you settings.json. (vsts.pat).");
-		this._vstsTeamProject = this.validateSettings("vsts.teamProject", "Please specify the team project name within the Visual Studio Team Services account in you settings.json. (vsts.teamProject).");
+		this._vstsAccount = this.validateSettings(Constants.settingAccountName, Constants.errorAccountName);
+		this._vstsPersonalAccessToken = this.validateSettings(Constants.settingPersonalAccessToken, Constants.errorPersonalAccessToken);
+		this._vstsTeamProject = this.validateSettings(Constants.settingTeamProjectName, Constants.errorTeamProjectName);
 
 		// Create the instance of the VSTS client
 		var vsts = require("vso-client");
-		this._vstsClient = vsts.createClient("https://" + this._vstsAccount, this._vstsCollection, "", this._vstsPersonalAccessToken);
+		this._vstsClient = vsts.createClient("https://" + this._vstsAccount, Constants.defaultCollectionName, "", this._vstsPersonalAccessToken);
 
 		// Add the details of the account and team project to the status bar
 		if (this._vstsAccount != undefined && this._vstsAccount != ""
 			&& this._vstsTeamProject != undefined && this._vstsTeamProject) {
 			var statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-			statusBarItem.text  = "$(icon octicon-globe) " + this._vstsAccount.replace(".visualstudio.com", "") + " $(icon octicon-organization) " + this._vstsTeamProject;
+			statusBarItem.text = Constants.iconAccount + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Constants.iconTeamProject + " " + this._vstsTeamProject;
 			statusBarItem.command = "extension.openVSTSPortal";
 			statusBarItem.show();
 		}
@@ -41,7 +41,7 @@ export class WorkItemService {
 						}).then(function (title:string) {
 							if (title != undefined && title.length > 0) {
 								// Create the new work item
-								var newWorkItem = [{ op: "add", path: "/fields/System.Title", value: title }];
+								var newWorkItem = [{ op: "add", path: "/fields/" + Constants.fieldTitle, value: title }];
 								_self._vstsClient.createWorkItem(newWorkItem, _self._vstsTeamProject, workItemType, function(err, workItem) {
 									if (err) {
 										vscode.window.showErrorMessage("Unable to create Visual Studio Team Services work item. Please try again later.");
@@ -57,7 +57,7 @@ export class WorkItemService {
 
 	public openPortal() {
 		var open = require("open");
-		open("https://" + this._vstsAccount + "/" + this._vstsCollection + "/" + this._vstsTeamProject + "/_workitems");
+		open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems");
 	}
 
 	public queryWorkItems(): void {
@@ -84,16 +84,16 @@ export class WorkItemService {
 					reject(err);
 				} else {
 					// Get the work item details
-					_self._vstsClient.getWorkItemsById(workItemIds, ["System.Id", "System.WorkItemType", "System.Title"], function (err, workItems) {
+					_self._vstsClient.getWorkItemsById(workItemIds, [Constants.fieldId, Constants.fieldTitle, Constants.fieldWorkItemType], function (err, workItems) {
 						if (err) {
 							reject(err);
 						} else {
 							var results: Array<WorkItemQuickPickItem> = [];
 							for (var index = 0; index < workItems.length; index++) {
 								results.push({
-									id: workItems[index].fields["System.Id"],
-									label: workItems[index].fields["System.Id"] + "  [" + workItems[index].fields["System.WorkItemType"] +"]",
-									description: workItems[index].fields["System.Title"]
+									id: workItems[index].fields[Constants.fieldId],
+									label: workItems[index].fields[Constants.fieldId] + "  [" + workItems[index].fields[Constants.fieldWorkItemType] +"]",
+									description: workItems[index].fields[Constants.fieldTitle]
 								});
 							}
 							resolve(results);
@@ -106,14 +106,14 @@ export class WorkItemService {
 
 	private openWorkItem(id:string) {
 		var open = require("open");
-		open("https://" + this._vstsAccount + "/" + this._vstsCollection + "/" + this._vstsTeamProject + "/_workitems#id=" + id);
+		open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + id);
 	}
 
 	private queryWorkItemQueries(): Promise<Array<WorkItemQueryQuickPickItem>> {
 		var _self = this;
 
 		return new Promise((resolve, reject) => {
-			_self._vstsClient.getQueries(this._vstsTeamProject, 1, "wiql", "My Queries", 0, function (err, queries) {
+			_self._vstsClient.getQueries(this._vstsTeamProject, 1, "wiql", Constants.queryFolderName, 0, function (err, queries) {
 				if (err) {
 					reject("Unable to get your Visual Studio Team Services work item queries. Please make sure your Visual Studio Team Services settings are corect.");
 				} else {
@@ -162,16 +162,4 @@ export class WorkItemService {
 
 		return settingValue;
 	}
-}
-
-export class WorkItemQuickPickItem implements vscode.QuickPickItem {
-	label:string;
-	description:string;
-	id: string;
-}
-
-export class WorkItemQueryQuickPickItem implements vscode.QuickPickItem {
-	label:string;
-	description:string;
-	wiql: string;
 }
