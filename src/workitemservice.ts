@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { Constants } from "./constants";
+import { Constants, Icons, ErrorMessages, SettingNames, WorkItemFields } from "./constants";
 import { WorkItemQuickPickItem, WorkItemQueryQuickPickItem } from "./common";
 
 export class WorkItemService {
@@ -11,9 +11,9 @@ export class WorkItemService {
 
 	constructor() {
 		// Validate/load settings
-		this._vstsAccount = this.validateSettings(Constants.settingAccountName, Constants.errorAccountName);
-		this._vstsPersonalAccessToken = this.validateSettings(Constants.settingPersonalAccessToken, Constants.errorPersonalAccessToken);
-		this._vstsTeamProject = this.validateSettings(Constants.settingTeamProjectName, Constants.errorTeamProjectName);
+		this._vstsAccount = this.validateSettings(SettingNames.accountName, ErrorMessages.accountNameMissing);
+		this._vstsPersonalAccessToken = this.validateSettings(SettingNames.personalAccessToken, ErrorMessages.personalAccessTokenMissing);
+		this._vstsTeamProject = this.validateSettings(SettingNames.teamProjectName, ErrorMessages.teamProjectNameMissing);
 
 		// Create the instance of the VSTS client
 		var vsts = require("vso-client");
@@ -23,7 +23,7 @@ export class WorkItemService {
 		if (this._vstsAccount != undefined && this._vstsAccount != ""
 			&& this._vstsTeamProject != undefined && this._vstsTeamProject) {
 			var statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left);
-			statusBarItem.text = Constants.iconAccount + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Constants.iconTeamProject + " " + this._vstsTeamProject;
+			statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
 			statusBarItem.command = "extension.openVSTSPortal";
 			statusBarItem.show();
 		}
@@ -43,11 +43,11 @@ export class WorkItemService {
 							}).then(function (title:string) {
 								if (title != undefined && title.length > 0) {
 									// Create the new work item
-									var newWorkItem = [{ op: "add", path: "/fields/" + Constants.fieldTitle, value: title }];
+									var newWorkItem = [{ op: "add", path: "/fields/" + WorkItemFields.title, value: title }];
 									_self._vstsClient.createWorkItem(newWorkItem, _self._vstsTeamProject, workItemType, function(err, workItem) {
 										if (err) {
 											console.log("ERROR: " + err.message);
-											vscode.window.showErrorMessage(Constants.errorCreateWorkItem + " " + Constants.errorHint);
+											_self.displayError(err, ErrorMessages.createWorkItem);
 										} else {
 											vscode.window.showInformationMessage("Visual Studio Team Services work item " +  workItem.id + " created successfully.");
 										}
@@ -90,6 +90,11 @@ export class WorkItemService {
 				});
 	}
 
+	private displayError(err, errorMessage: string): void {
+		// TODO: Parse err.message to display a better hint
+		vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.generalHint);
+	}
+
 	private execWorkItemQuery(wiql: string): Promise<Array<WorkItemQuickPickItem>> {
 		var _self = this;
 
@@ -97,21 +102,21 @@ export class WorkItemService {
 			// Execute the wiql and get the work item ids
 			_self._vstsClient.getWorkItemIds(wiql, _self._vstsTeamProject, function(err, workItemIds) {
 				if (err) {
-					vscode.window.showErrorMessage(Constants.errorExecuteWorkItemQuery + " " + Constants.errorHint);
+					_self.displayError(err, ErrorMessages.executeWorkItemQuery);
 					reject(err);
 				} else {
 					// Get the work item details
-					_self._vstsClient.getWorkItemsById(workItemIds, [Constants.fieldId, Constants.fieldTitle, Constants.fieldWorkItemType], function (err, workItems) {
+					_self._vstsClient.getWorkItemsById(workItemIds, [WorkItemFields.id, WorkItemFields.title, WorkItemFields.workItemType], function (err, workItems) {
 						if (err) {
-							vscode.window.showErrorMessage(Constants.errorGetWorkItemDetails + " " + Constants.errorHint);
+							_self.displayError(err, ErrorMessages.getWorkItemDetails);
 							reject(err);
 						} else {
 							var results: Array<WorkItemQuickPickItem> = [];
 							for (var index = 0; index < workItems.length; index++) {
 								results.push({
-									id: workItems[index].fields[Constants.fieldId],
-									label: workItems[index].fields[Constants.fieldId] + "  [" + workItems[index].fields[Constants.fieldWorkItemType] +"]",
-									description: workItems[index].fields[Constants.fieldTitle]
+									id: workItems[index].fields[WorkItemFields.id],
+									label: workItems[index].fields[WorkItemFields.id] + "  [" + workItems[index].fields[WorkItemFields.workItemType] +"]",
+									description: workItems[index].fields[WorkItemFields.title]
 								});
 							}
 							resolve(results);
@@ -133,7 +138,7 @@ export class WorkItemService {
 		return new Promise((resolve, reject) => {
 			_self._vstsClient.getQueries(this._vstsTeamProject, 1, "wiql", Constants.queryFolderName, 0, function (err, queries) {
 				if (err) {
-					vscode.window.showErrorMessage(Constants.errorWorlItemQueries + " " + Constants.errorHint);
+					_self.displayError(err, ErrorMessages.getWorkItemQueries);
 					reject(err);
 				} else {
 					var results:Array<WorkItemQueryQuickPickItem> = [];
@@ -159,7 +164,7 @@ export class WorkItemService {
 			} else {
 				_self._vstsClient.getWorkItemTypes(_self._vstsTeamProject, function(err, workItemTypes) {
 					if (err) {
-						vscode.window.showErrorMessage(Constants.errorWorkItemTypes + " " + Constants.errorHint);
+						_self.displayError(err, ErrorMessages.getWorkItemTypes);
 						reject(err);
 					} else {
 						for (var index = 0; index < workItemTypes.length; index++) {
