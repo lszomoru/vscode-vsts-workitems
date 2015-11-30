@@ -91,8 +91,26 @@ export class WorkItemService {
 	}
 
 	private displayError(err, errorMessage: string): void {
-		// TODO: Parse err.message to display a better hint
-		vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.generalHint);
+		if (err != undefined) {
+			var message = err.hasOwnProperty("message") ? err.message : err;
+
+			if (message.indexOf("The resource cannot be found") > -1) {
+				// Wrong account name
+				vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.accountNotFoundHint);
+			} else if (message.indexOf("TF200016") > -1) {
+				// Wrong team project name
+				vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.teamProjectNotFoundHint);
+			} else if (message.indexOf("Error unauthorized") > -1) {
+				// Insufficient permissions
+				vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.insufficientPermissionsHint);
+			} else {
+				// Generic hint
+				vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.generalHint);
+			}
+		} else {
+			// Generic hint
+			vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.generalHint);
+		}
 	}
 
 	private execWorkItemQuery(wiql: string): Promise<Array<WorkItemQuickPickItem>> {
