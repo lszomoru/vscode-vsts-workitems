@@ -3,12 +3,14 @@
 Create, query, and access Visual Studio Team Services work items from within Visual Studio Code.
 
 ## Features
-* Visual Studio Team Services account/team project indicator on the status bar. Quickly access your Visual Studio Team Services account by clicking on the status bar item.
+### Visual Studio Team Services account/team project indicator
+Based on the information specified in ```settings.json``` a visual indicator is added to the Visual Studio Code status bar with the details of the Visual Studio Team Service account and team project that the extension is connected to.
 ![VSCode](assets/vscode1.png)
-* Create a new work item in your Visual Studio Team Services account.
+### Create new work item
 ![VSCode](assets/vscode4.png)
 ![VSCode](assets/vscode5.png)
-* Execute a work item querie stored in the "My Queries" folder in your Visual Studio Team Services account/team project. Quickly open a work item that is returned by your work item query.
+### Query work items
+Execute a work item querie stored in the "My Queries" folder and open a work item that is returned by the work item query.
 ![VSCode](assets/vscode2.png)
 ![VSCode](assets/vscode3.png)
 
