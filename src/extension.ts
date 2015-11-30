@@ -3,13 +3,20 @@
 import * as vscode from "vscode";
 import { WorkItemService } from "./workitemservice";
 
+var workItemService: WorkItemService;
+
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	let workItemService:WorkItemService = new WorkItemService();
+	workItemService = new WorkItemService();
 
 	// Register the commands from the extention
-	vscode.commands.registerCommand("extension.createVSTSWorkItem", () => workItemService.createWorkItem());
-	vscode.commands.registerCommand("extension.queryVSTSWorkItems", () => workItemService.queryWorkItems());
-	vscode.commands.registerCommand("extension.openVSTSPortal", () => workItemService.openPortal());
+	registerCommand(context, "extension.createVSTSWorkItem", () => workItemService.createWorkItem());
+	registerCommand(context, "extension.queryVSTSWorkItems", () => workItemService.queryWorkItems());
+	registerCommand(context, "extension.openVSTSWorkItemsPortal", () => workItemService.openPortal());
+}
+
+function registerCommand(context: vscode.ExtensionContext, command: string, callback: (...args: any[]) => any) {
+     let disposable =  vscode.commands.registerCommand(command, callback);
+     context.subscriptions.push(disposable);
 }

@@ -1,9 +1,21 @@
 {
 	"name": "vscode-vsts-workitems",
-	"displayName": "Visual Studio Team Services work item management.",
-	"description": "Visual Studio Code extension to manipulate Visual Studio Team Services work items.",
+	"displayName": "Visual Studio Team Services work item management extension",
+	"description": "Create/query/access Visual Studio Team Services work items from within Visual Studio Code.",
+	"keywords": ["VSO", "Visual Studio Online", "VSTS", "Visual Studio Team Services", "work item", "workitem", "work items", "workitems", "task", "tasks", "bug", "bugs"],
+	"icon": "assets/vsteam.png",
 	"version": "0.0.1",
 	"publisher": "lszomoru",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/lszomoru/vscode-vsts-workitems/issues",
+	    "email": "lszomoru@microsoft.com"
+	},
+	"homepage": "https://github.com/lszomoru/vscode-vsts-workitems/blob/master/README.md",
+	"repository": {
+		"type": "git",
+	    "url": "https://github.com/lszomoru/vscode-vsts-workitems.git"
+	},	
 	"engines": {
 		"vscode": "^0.10.1"
 	},
@@ -23,8 +35,8 @@
 				"title": "Query Visual Studio Team Services work items."
 			},
 			{
-				"command": "extension.openVSTSPortal",
-				"title": "Open Visual Studio Team Services portal."
+				"command": "extension.openVSTSWorkItemsPortal",
+				"title": "Open Visual Studio Team Services work items portal."
 			}],
 		"configuration": {
 			"type": "object",
@@ -51,6 +63,10 @@
 	"scripts": {
 		"vscode:prepublish": "node ./node_modules/vscode/bin/compile",
 		"compile": "node ./node_modules/vscode/bin/compile -watch -p ./"
+	},
+	"dependencies": {
+		"open": "0.0.5",
+		"vso-client": "^0.2.5"
 	},
 	"devDependencies": {
 		"typescript": "^1.6.2",
