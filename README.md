@@ -3,6 +3,7 @@
 Create, query, and access Visual Studio Team Services work items from within Visual Studio Code.
 
 ## Features
+The features are available through the three commands that were added to the [command palette](https://code.visualstudio.com/Docs/editor/codebasics#_command-palette): *Open Visual Studio Team Services work items portal*, *Create Visual Studio Team Services work item*, and *Query Visual Studio Team Services work items*.
 ### Visual Studio Team Services account/team project indicator
 Based on the information specified in ```settings.json``` a visual indicator is added to the Visual Studio Code status bar with the details of the Visual Studio Team Service account and team project that the extension is connected to.
 ![VSCode](assets/vscode1.png)
