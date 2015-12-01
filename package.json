@@ -61,7 +61,12 @@
 					"type": "array",
           			"default": [],
           			"description": "Visual Studio Team Services work item types."
-				}								
+				},
+				"vsts.statusBarItemPriority": {
+					"type": "number",
+          			"default": 99,
+          			"description": "Priority of the status bar item. The higher the priority the more left the item is displayed."
+				}																
 			}
 		}
 	},

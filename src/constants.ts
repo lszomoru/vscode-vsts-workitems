@@ -1,4 +1,5 @@
 export class Constants {
+	static statusBarItemPriority:number = 99;
 	static queryFolderName:string = "My Queries";
 	static defaultCollectionName: string = "DefaultCollection";
 }
@@ -29,6 +30,7 @@ export class SettingNames {
 	static accountName: string = "vsts.account";
 	static personalAccessToken:string = "vsts.pat";
 	static teamProjectName:string = "vsts.teamProject";
+	static statusBarItemPriority:string = "vsts.statusBarItemPriority";
 }
 
 export class WorkItemFields {
