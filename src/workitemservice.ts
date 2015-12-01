@@ -15,18 +15,21 @@ export class WorkItemService {
 		this._vstsPersonalAccessToken = this.validateSettings(SettingNames.personalAccessToken, ErrorMessages.personalAccessTokenMissing);
 		this._vstsTeamProject = this.validateSettings(SettingNames.teamProjectName, ErrorMessages.teamProjectNameMissing);
 
+		// Open the settings file in case any of the settings are missing
+		if (this._vstsAccount == "" || this._vstsPersonalAccessToken == "" || this._vstsTeamProject == "" ) {
+			vscode.commands.executeCommand("workbench.action.openGlobalSettings");
+			return;
+		}
+
+		// Add the details of the account and team project to the status bar
+		var statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
+		statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
+		statusBarItem.command = "extension.openVSTSPortal";
+		statusBarItem.show();
+
 		// Create the instance of the VSTS client
 		var vsts = require("vso-client");
 		this._vstsClient = vsts.createClient("https://" + this._vstsAccount, Constants.defaultCollectionName, "", this._vstsPersonalAccessToken);
-
-		// Add the details of the account and team project to the status bar
-		if (this._vstsAccount != undefined && this._vstsAccount != ""
-			&& this._vstsTeamProject != undefined && this._vstsTeamProject) {
-			var statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 99);
-			statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
-			statusBarItem.command = "extension.openVSTSPortal";
-			statusBarItem.show();
-		}
 	}
 
 	public createWorkItem():void {
@@ -111,6 +114,9 @@ export class WorkItemService {
 			// Generic hint
 			vscode.window.showErrorMessage(errorMessage + " " + ErrorMessages.generalHint);
 		}
+
+		// Open the settings file
+		vscode.commands.executeCommand("workbench.action.openGlobalSettings");
 	}
 
 	private execWorkItemQuery(wiql: string): Promise<Array<WorkItemQuickPickItem>> {

@@ -12,7 +12,6 @@ export function activate(context: vscode.ExtensionContext) {
 
 	// Register the commands from the extention
 	context.subscriptions.push(vscode.commands.registerCommand("extension.createVSTSWorkItem", () => workItemService.createWorkItem()));
-	context.subscriptions.push(vscode.commands.registerCommand("extension.createVSTSWorkItemFromSelection", () => workItemService.createWorkItemFromSelection()));
 	context.subscriptions.push(vscode.commands.registerCommand("extension.queryVSTSWorkItems", () => workItemService.queryWorkItems()));
 	context.subscriptions.push(vscode.commands.registerCommand("extension.openVSTSWorkItemsPortal", () => workItemService.openPortal()));
 }
