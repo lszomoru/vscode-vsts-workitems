@@ -185,8 +185,14 @@ export class WorkItemService {
 						_self.displayError(err, ErrorMessages.getWorkItemTypes);
 						reject(err);
 					} else {
+						// Check against the work item types in the settings
+						let configuration = vscode.workspace.getConfiguration();
+						let witTypes = configuration.get<Array<string>>("vsts.workItemTypes");
+
 						for (var index = 0; index < workItemTypes.length; index++) {
-							_self._vstsWorkItemTypes.push(workItemTypes[index].name);
+							if (!witTypes || witTypes.length == 0 || witTypes.indexOf(workItemTypes[index].name) != -1) {
+								_self._vstsWorkItemTypes.push(workItemTypes[index].name);
+							}
 						}
 						resolve(_self._vstsWorkItemTypes);
 					}

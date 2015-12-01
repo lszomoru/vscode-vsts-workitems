@@ -56,7 +56,12 @@
 					"type": "string",
           			"default": "",
           			"description": "Visual Studio Team Services team project name."
-				}				
+				},
+				"vsts.workItemTypes": {
+					"type": "array",
+          			"default": [],
+          			"description": "Visual Studio Team Services work item types."
+				}								
 			}
 		}
 	},
