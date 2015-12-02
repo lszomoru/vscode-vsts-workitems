@@ -156,11 +156,14 @@ export class WorkItemService {
 		// Get the status bar item priority from the settings
 		let priority = this.readSetting<number>(SettingNames.statusBarItemPriority, Constants.statusBarItemPriority);
 
-		// Add the details of the account and team project to the status bar
-		if (!this._statusBarItem) {
-			this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
-			this._statusBarItem.command = "extension.openVSTSPortal";
+		// Hide existing status bar item
+		if (this._statusBarItem) {
+			this._statusBarItem.hide();
 		}
+
+		// Add the details of the account and team project to the status bar
+		this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
+		this._statusBarItem.command = "extension.openVSTSPortal";
 		this._statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
 		this._statusBarItem.show();
 
