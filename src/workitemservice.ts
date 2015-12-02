@@ -10,31 +10,17 @@ export class WorkItemService {
 	private _vstsAccount:string;
 	private _vstsPersonalAccessToken:string;
 	private _vstsTeamProject:string;
-	private _vstsWorkItemTypes:Array<string> = [];
+	private _vstsWorkItemTypes:Array<string>;
+	private _statusBarItem:vscode.StatusBarItem;
 
 	constructor() {
-		// Validate/load settings
-		this._vstsAccount = this.readSetting<string>(SettingNames.accountName, "", "", ErrorMessages.accountNameMissing);
-		this._vstsPersonalAccessToken = this.readSetting<string>(SettingNames.personalAccessToken, "", "", ErrorMessages.personalAccessTokenMissing);
-		this._vstsTeamProject = this.readSetting<string>(SettingNames.teamProjectName, "", "", ErrorMessages.teamProjectNameMissing);
+		// Add the event listener for settings changes
+		vscode.workspace.onDidChangeConfiguration(() => {
+			this.loadSettings();
+		});
 
-		// Open the settings file in case any of the settings are missing
-		if (this._vstsAccount == "" || this._vstsPersonalAccessToken == "" || this._vstsTeamProject == "" ) {
-			this.openGlobalSettings();
-			return;
-		}
-
-		// Get the status bar item priority from the settings
-		let priority = this.readSetting<number>(SettingNames.statusBarItemPriority, Constants.statusBarItemPriority);
-
-		// Add the details of the account and team project to the status bar
-		let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
-		statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
-		statusBarItem.command = "extension.openVSTSPortal";
-		statusBarItem.show();
-
-		// Create the instance of the VSTS client
-		this._vstsClient = vsts.createClient("https://" + this._vstsAccount, Constants.defaultCollectionName, "", this._vstsPersonalAccessToken);
+		// Load settings
+		this.loadSettings();
 	}
 
 	public createWorkItem():void {
@@ -155,6 +141,36 @@ export class WorkItemService {
 		});
 	}
 
+	private loadSettings():void {
+		// Load/Validate the settings
+		this._vstsAccount = this.readSetting<string>(SettingNames.accountName, "", "", ErrorMessages.accountNameMissing);
+		this._vstsPersonalAccessToken = this.readSetting<string>(SettingNames.personalAccessToken, "", "", ErrorMessages.personalAccessTokenMissing);
+		this._vstsTeamProject = this.readSetting<string>(SettingNames.teamProjectName, "", "", ErrorMessages.teamProjectNameMissing);
+
+		// Open the settings file in case any of the settings are missing
+		if (this._vstsAccount == "" || this._vstsPersonalAccessToken == "" || this._vstsTeamProject == "" ) {
+			this.openGlobalSettings();
+			return;
+		}
+
+		// Get the status bar item priority from the settings
+		let priority = this.readSetting<number>(SettingNames.statusBarItemPriority, Constants.statusBarItemPriority);
+
+		// Add the details of the account and team project to the status bar
+		if (!this._statusBarItem) {
+			this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
+			this._statusBarItem.command = "extension.openVSTSPortal";
+		}
+		this._statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
+		this._statusBarItem.show();
+
+		// Create the instance of the VSTS client
+		this._vstsClient = vsts.createClient("https://" + this._vstsAccount, Constants.defaultCollectionName, "", this._vstsPersonalAccessToken);
+
+		// Reset the work item types array
+		this._vstsWorkItemTypes = [];
+	}
+
 	private openGlobalSettings():void {
 		vscode.commands.executeCommand("workbench.action.openGlobalSettings");
 	}
@@ -214,7 +230,7 @@ export class WorkItemService {
 		let value = configuration.get<T>(name);
 
 		// Check if we need to do any validation on the setting value
-		if (warningValue && warningMessage && warningMessage.length > 0) {
+		if (warningValue != null && warningMessage && warningMessage.length > 0) {
 			if (!value || value == warningValue) {
 				vscode.window.showWarningMessage(warningMessage);
 			}
