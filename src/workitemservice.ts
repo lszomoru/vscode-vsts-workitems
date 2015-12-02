@@ -2,6 +2,9 @@ import * as vscode from "vscode";
 import { Constants, Icons, ErrorMessages, SettingNames, WorkItemFields } from "./constants";
 import { WorkItemQuickPickItem, WorkItemQueryQuickPickItem } from "./common";
 
+var open = require("open");
+var vsts = require("vso-client");
+
 export class WorkItemService {
 	private _vstsClient:any;
 	private _vstsAccount:string;
@@ -11,27 +14,26 @@ export class WorkItemService {
 
 	constructor() {
 		// Validate/load settings
-		this._vstsAccount = this.validateSettings(SettingNames.accountName, ErrorMessages.accountNameMissing);
-		this._vstsPersonalAccessToken = this.validateSettings(SettingNames.personalAccessToken, ErrorMessages.personalAccessTokenMissing);
-		this._vstsTeamProject = this.validateSettings(SettingNames.teamProjectName, ErrorMessages.teamProjectNameMissing);
+		this._vstsAccount = this.readSetting<string>(SettingNames.accountName, "", "", ErrorMessages.accountNameMissing);
+		this._vstsPersonalAccessToken = this.readSetting<string>(SettingNames.personalAccessToken, "", "", ErrorMessages.personalAccessTokenMissing);
+		this._vstsTeamProject = this.readSetting<string>(SettingNames.teamProjectName, "", "", ErrorMessages.teamProjectNameMissing);
 
 		// Open the settings file in case any of the settings are missing
 		if (this._vstsAccount == "" || this._vstsPersonalAccessToken == "" || this._vstsTeamProject == "" ) {
-			vscode.commands.executeCommand("workbench.action.openGlobalSettings");
+			this.openGlobalSettings();
 			return;
 		}
 
-		// Add the details of the account and team project to the status bar
-		var priority = vscode.workspace.getConfiguration().get<number>(SettingNames.statusBarItemPriority);
-		priority = (priority) ? priority : Constants.statusBarItemPriority;
+		// Get the status bar item priority from the settings
+		let priority = this.readSetting<number>(SettingNames.statusBarItemPriority, Constants.statusBarItemPriority);
 
-		var statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
+		// Add the details of the account and team project to the status bar
+		let statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
 		statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
 		statusBarItem.command = "extension.openVSTSPortal";
 		statusBarItem.show();
 
 		// Create the instance of the VSTS client
-		var vsts = require("vso-client");
 		this._vstsClient = vsts.createClient("https://" + this._vstsAccount, Constants.defaultCollectionName, "", this._vstsPersonalAccessToken);
 	}
 
@@ -42,12 +44,12 @@ export class WorkItemService {
 		vscode.window.showQuickPick(this.queryWorkItemTypes())
 			.then(
 				function (workItemType: string) {
-					if (workItemType != undefined && workItemType.length > 0) {
+					if (workItemType && workItemType.length > 0) {
 						// Get the title of the new work item
 						vscode.window.showInputBox({
 							placeHolder: "Title of the " + workItemType + "."
 							}).then(function (title:string) {
-								if (title != undefined && title.length > 0) {
+								if (title && title.length > 0) {
 									// Create the new work item
 									var newWorkItem = [{ op: "add", path: "/fields/" + WorkItemFields.title, value: title }];
 									_self._vstsClient.createWorkItem(newWorkItem, _self._vstsTeamProject, workItemType, function(err, workItem) {
@@ -68,7 +70,6 @@ export class WorkItemService {
 	}
 
 	public openPortal() {
-		var open = require("open");
 		open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems");
 	}
 
@@ -79,12 +80,12 @@ export class WorkItemService {
 		vscode.window.showQuickPick(this.queryWorkItemQueries())
 			.then(
 				function (query) {
-					if (query != undefined) {
+					if (query) {
 						// Execute the selected query and display the results
 						vscode.window.showQuickPick(_self.execWorkItemQuery(query.wiql))
 							.then(
 								function (workItem) {
-									_self.openWorkItem(workItem.id);
+									open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + workItem.id);
 								},
 								function (err) {
 									console.log("ERROR: " + err.message);
@@ -97,7 +98,7 @@ export class WorkItemService {
 	}
 
 	private displayError(err, errorMessage: string): void {
-		if (err != undefined) {
+		if (err) {
 			var message = err.hasOwnProperty("message") ? err.message : err;
 
 			if (message.indexOf("The resource cannot be found") > -1) {
@@ -119,7 +120,7 @@ export class WorkItemService {
 		}
 
 		// Open the settings file
-		vscode.commands.executeCommand("workbench.action.openGlobalSettings");
+		this.openGlobalSettings();
 	}
 
 	private execWorkItemQuery(wiql: string): Promise<Array<WorkItemQuickPickItem>> {
@@ -154,9 +155,8 @@ export class WorkItemService {
 		});
 	}
 
-	private openWorkItem(id:string) {
-		var open = require("open");
-		open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + id);
+	private openGlobalSettings():void {
+		vscode.commands.executeCommand("workbench.action.openGlobalSettings");
 	}
 
 	private queryWorkItemQueries(): Promise<Array<WorkItemQueryQuickPickItem>> {
@@ -195,8 +195,7 @@ export class WorkItemService {
 						reject(err);
 					} else {
 						// Check against the work item types in the settings
-						let configuration = vscode.workspace.getConfiguration();
-						let witTypes = configuration.get<Array<string>>("vsts.workItemTypes");
+						let witTypes = _self.readSetting<Array<string>>(SettingNames.workItemTypes, []);
 
 						for (var index = 0; index < workItemTypes.length; index++) {
 							if (!witTypes || witTypes.length == 0 || witTypes.indexOf(workItemTypes[index].name) != -1) {
@@ -210,14 +209,17 @@ export class WorkItemService {
 		});
 	}
 
-	private validateSettings(settingName: string, errorMessage:string): string {
-		var configuration = vscode.workspace.getConfiguration();
-		var settingValue = configuration.get<string>(settingName);
+	private readSetting<T>(name: string, defaultValue:T, warningValue:T = null, warningMessage: string = ""): T {
+		let configuration = vscode.workspace.getConfiguration();
+		let value = configuration.get<T>(name);
 
-		if (settingValue == undefined || settingValue.length == 0) {
-			vscode.window.showWarningMessage(errorMessage);
+		// Check if we need to do any validation on the setting value
+		if (warningValue && warningMessage && warningMessage.length > 0) {
+			if (!value || value == warningValue) {
+				vscode.window.showWarningMessage(warningMessage);
+			}
 		}
 
-		return settingValue;
+		return value || defaultValue;
 	}
 }

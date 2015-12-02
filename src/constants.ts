@@ -30,6 +30,7 @@ export class SettingNames {
 	static accountName: string = "vsts.account";
 	static personalAccessToken:string = "vsts.pat";
 	static teamProjectName:string = "vsts.teamProject";
+	static workItemTypes:string = "vsts.workItemTypes";
 	static statusBarItemPriority:string = "vsts.statusBarItemPriority";
 }
 

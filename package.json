@@ -38,6 +38,23 @@
 				"command": "extension.openVSTSWorkItemsPortal",
 				"title": "Open Visual Studio Team Services work items portal."
 			}],
+		"keybindings": [
+			{
+				"command": "extension.createVSTSWorkItem",
+				"key": "ctrl+w ctrl+n",
+				"mac": "cmd+w cmd+n"
+			},
+			{
+				"command": "extension.queryVSTSWorkItems",
+				"key": "ctrl+w ctrl+o",
+				"mac": "cmd+w cmd+o"
+			},
+			{
+				"command": "extension.openVSTSWorkItemsPortal",
+				"key": "ctrl+w ctrl+p",
+				"mac": "cmd+w cmd+p"
+			}
+		],
 		"configuration": {
 			"type": "object",
 			"title": "Visual Studio Team Services account settings",
