@@ -31,12 +31,17 @@
 				"title": "Create Visual Studio Team Services work item."
 			},
 			{
+				"command": "extension.createVSTSTaskFromSelection",
+				"title": "Create Visual Studio Team Services task from selection."
+			},
+			{
 				"command": "extension.queryVSTSWorkItems",
 				"title": "Query Visual Studio Team Services work items."
 			},
 			{
 				"command": "extension.openVSTSWorkItemsPortal",
 				"title": "Open Visual Studio Team Services work items portal."
+				
 			}],
 		"keybindings": [
 			{
@@ -44,6 +49,12 @@
 				"key": "ctrl+w ctrl+n",
 				"mac": "cmd+w cmd+n"
 			},
+			{
+				"command": "extension.createVSTSTaskFromSelection",
+				"key": "ctrl+w ctrl+t",
+				"mac": "cmd+w cmd+t",
+				"when": "editorTextFocus"
+			},			
 			{
 				"command": "extension.queryVSTSWorkItems",
 				"key": "ctrl+w ctrl+o",

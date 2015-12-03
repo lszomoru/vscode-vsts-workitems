@@ -23,7 +23,51 @@ export class WorkItemService {
 		this.loadSettings();
 	}
 
-	public createWorkItem():void {
+	public newTaskFromSelection():void {
+		var _self = this;
+
+		// Make sure we have an active editor 
+		let editor = vscode.window.activeTextEditor;
+		if (!editor) {
+			return;
+		}
+
+		// Make sure that the language is supported
+		if (editor.document.languageId != "javascript" &&
+			editor.document.languageId != "typescript" &&
+			editor.document.languageId != "typescript react" &&
+			editor.document.languageId != "csharp") {
+				return;
+			}
+
+		// Make sure that the selection is not empty and it is a single line 
+		let selection = editor.selection;
+		if (selection.isEmpty || !selection.isSingleLine) {
+			return;
+		}
+
+		let range = new vscode.Range(selection.start.line, selection.start.character, selection.end.line, selection.end.character);
+		let taskTitle = editor.document.getText(range).trim();
+
+		if (taskTitle && taskTitle.length > 0) {
+			// Remove starting "/" characters 
+			taskTitle = taskTitle.substr(taskTitle.search("\\w"));
+
+			// Create the task using the title
+			this.createWorkItem(taskTitle, "Task").then((id) => {
+				// Copy the text for indentation 
+				let firstNonWhiteSpace: number = editor.document.lineAt(range.start.line).firstNonWhitespaceCharacterIndex;
+				let indentText:string = editor.document.getText(new vscode.Range(new vscode.Position(range.start.line, 0), new vscode.Position(range.start.line, firstNonWhiteSpace)));
+
+				// Insert the work item link into source
+				editor.edit(edit => {
+					edit.insert(range.end, "\n" + indentText + "// https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + id);
+				});
+			});
+		}
+	}
+
+	public newWorkItem():void {
 		var _self = this;
 
 		// Get the list of work item types
@@ -37,14 +81,8 @@ export class WorkItemService {
 							}).then(function (title:string) {
 								if (title && title.length > 0) {
 									// Create the new work item
-									var newWorkItem = [{ op: "add", path: "/fields/" + WorkItemFields.title, value: title }];
-									_self._vstsClient.createWorkItem(newWorkItem, _self._vstsTeamProject, workItemType, function(err, workItem) {
-										if (err) {
-											console.log("ERROR: " + err.message);
-											_self.displayError(err, ErrorMessages.createWorkItem);
-										} else {
-											vscode.window.showInformationMessage("Visual Studio Team Services work item " +  workItem.id + " created successfully.");
-										}
+									_self.createWorkItem(title, workItemType).then((id) => {
+										vscode.window.showInformationMessage("Visual Studio Team Services work item " +  id + " created successfully.");
 									});
 								}
 						});
@@ -81,6 +119,24 @@ export class WorkItemService {
 				function (err) {
 					console.log("ERROR: " + err.message);
 				});
+	}
+
+	private createWorkItem(title: string, workItemType: string): Promise<number> {
+		var _self = this;
+
+		return new Promise<number>((resolve, reject) => {
+			let newWorkItem = [{ op: "add", path: "/fields/" + WorkItemFields.title, value: title }];
+
+			_self._vstsClient.createWorkItem(newWorkItem, _self._vstsTeamProject, workItemType, function(err, workItem) {
+				if (err) {
+					console.log("ERROR: " + err.message);
+					_self.displayError(err, ErrorMessages.createWorkItem);
+					reject();
+				} else {
+					resolve(parseInt(workItem.id));
+				}
+			});
+		});
 	}
 
 	private displayError(err, errorMessage: string): void {
