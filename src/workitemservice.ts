@@ -37,12 +37,18 @@ export class WorkItemService {
 			editor.document.languageId != "typescript" &&
 			editor.document.languageId != "typescript react" &&
 			editor.document.languageId != "csharp") {
+				vscode.window.showInformationMessage(ErrorMessages.languageNoSupported);
 				return;
 			}
 
 		// Make sure that the selection is not empty and it is a single line 
 		let selection = editor.selection;
-		if (selection.isEmpty || !selection.isSingleLine) {
+		if (selection.isEmpty) {
+			return;
+		}
+
+		if (!selection.isSingleLine) {
+			vscode.window.showInformationMessage(ErrorMessages.multiLineSelectionNotSupported);
 			return;
 		}
 

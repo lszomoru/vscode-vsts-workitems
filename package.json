@@ -41,7 +41,6 @@
 			{
 				"command": "extension.openVSTSWorkItemsPortal",
 				"title": "Open Visual Studio Team Services work items portal."
-				
 			}],
 		"keybindings": [
 			{
@@ -53,7 +52,7 @@
 				"command": "extension.createVSTSTaskFromSelection",
 				"key": "ctrl+w ctrl+t",
 				"mac": "cmd+w cmd+t",
-				"when": "editorTextFocus"
+				"when": "editorTextFocus && editorHasSelection"
 			},			
 			{
 				"command": "extension.queryVSTSWorkItems",

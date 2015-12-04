@@ -19,6 +19,9 @@ export class ErrorMessages {
 	static teamProjectNotFoundHint: string = "Please ensure that the Visual Studio Team Services team project name in settings.json is corect.";
 	static insufficientPermissionsHint: string = "Please ensure that the Visual Studio Team Services personal access token in settings.json has work item read/write permissions.";
 	static generalHint: string = "Please ensure that the Visual Studio Team Services settings in settings.json are corect.";
+
+	static languageNoSupported:string = "Creating a task from a selection only works in JavaScript, TypeScript, TypeScript React, and C# languages.";
+	static multiLineSelectionNotSupported:string = "Creating a task from a selection only works with a single line selection.";
 }
 
 export class Icons {
