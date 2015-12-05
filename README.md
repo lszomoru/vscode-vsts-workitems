@@ -30,5 +30,18 @@ In order for the extension to access your Visual Studio Team Servies account you
 }
 ```
 
+## Changelog
+### v0.0.2
+* Create new task from a single-line text selection (JavaScript, TypeScript, TypeScript React, C#). Using this feature you can easily convert comments into tasks. The link to the newly created task will be automatically injected into the editor.
+* Key bindings for each of the available commands
+* Configuration setting to filter work item types
+* Configuration setting to control status bar item ordering
+
+### v0.0.1 (2015-11-30)
+* Visual Studio Team Services account/team project indicator on the status bar
+* Open Visual Studio Team Services work items portal
+* Create new Visual Studio Team Services work item
+* Query Visual Studio Team Services work items
+
 ## License
 MIT. For more details check [LICENSE](LICENSE).
