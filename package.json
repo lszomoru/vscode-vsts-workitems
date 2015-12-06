@@ -87,7 +87,7 @@
 				"vsts.workItemTypes": {
 					"type": "array",
           			"default": [],
-          			"description": "Visual Studio Team Services work item types."
+          			"description": "Visual Studio Team Services work item types. (Ex: [\"Bug\", \"Task\"])"
 				},
 				"vsts.statusBarItemPriority": {
 					"type": "number",

@@ -55,76 +55,85 @@ export class WorkItemService {
 		let range = new vscode.Range(selection.start.line, selection.start.character, selection.end.line, selection.end.character);
 		let taskTitle = editor.document.getText(range).trim();
 
-		if (taskTitle && taskTitle.length > 0) {
-			// Remove starting "/" characters 
-			taskTitle = taskTitle.substr(taskTitle.search("\\w"));
 
-			// Create the task using the title
-			this.createWorkItem(taskTitle, "Task").then((id) => {
-				// Copy the text for indentation 
-				let firstNonWhiteSpace: number = editor.document.lineAt(range.start.line).firstNonWhitespaceCharacterIndex;
-				let indentText:string = editor.document.getText(new vscode.Range(new vscode.Position(range.start.line, 0), new vscode.Position(range.start.line, firstNonWhiteSpace)));
+		if (this._vstsClient) {
+			if (taskTitle && taskTitle.length > 0) {
+				// Remove starting "/" characters 
+				taskTitle = taskTitle.substr(taskTitle.search("\\w"));
 
-				// Insert the work item link into source
-				editor.edit(edit => {
-					edit.insert(range.end, "\n" + indentText + "// https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + id);
+				// Create the task using the title
+				this.createWorkItem(taskTitle, "Task").then((id) => {
+					// Copy the text for indentation 
+					let firstNonWhiteSpace: number = editor.document.lineAt(range.start.line).firstNonWhitespaceCharacterIndex;
+					let indentText:string = editor.document.getText(new vscode.Range(new vscode.Position(range.start.line, 0), new vscode.Position(range.start.line, firstNonWhiteSpace)));
+
+					// Insert the work item link into source
+					editor.edit(edit => {
+						edit.insert(range.end, "\n" + indentText + "// https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + id);
+					});
 				});
-			});
+			}
 		}
 	}
 
 	public newWorkItem():void {
 		var _self = this;
 
-		// Get the list of work item types
-		vscode.window.showQuickPick(this.queryWorkItemTypes())
-			.then(
-				function (workItemType: string) {
-					if (workItemType && workItemType.length > 0) {
-						// Get the title of the new work item
-						vscode.window.showInputBox({
-							placeHolder: "Title of the " + workItemType + "."
-							}).then(function (title:string) {
-								if (title && title.length > 0) {
-									// Create the new work item
-									_self.createWorkItem(title, workItemType).then((id) => {
-										vscode.window.showInformationMessage("Visual Studio Team Services work item " +  id + " created successfully.");
-									});
-								}
-						});
-					}
-				},
-				function (err) {
-					console.log("ERROR: " + err.message);
-				});
+		if (this._vstsClient) {
+			// Get the list of work item types
+			vscode.window.showQuickPick(this.queryWorkItemTypes())
+				.then(
+					function (workItemType: string) {
+						if (workItemType && workItemType.length > 0) {
+							// Get the title of the new work item
+							vscode.window.showInputBox({
+								placeHolder: "Title of the " + workItemType + "."
+								}).then(function (title:string) {
+									if (title && title.length > 0) {
+										// Create the new work item
+										_self.createWorkItem(title, workItemType).then((id) => {
+											vscode.window.showInformationMessage("Visual Studio Team Services work item " +  id + " created successfully.");
+										});
+									}
+							});
+						}
+					},
+					function (err) {
+						console.log("ERROR: " + err.message);
+					});
+		}
 	}
 
 	public openPortal() {
-		open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems");
+		if (this._vstsAccount != "" && this._vstsTeamProject != "") {
+			open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems");
+		}
 	}
 
 	public queryWorkItems(): void {
 		var _self = this;
 
-		// Get the list of queries from the "My Queries" folder
-		vscode.window.showQuickPick(this.queryWorkItemQueries())
-			.then(
-				function (query) {
-					if (query) {
-						// Execute the selected query and display the results
-						vscode.window.showQuickPick(_self.execWorkItemQuery(query.wiql))
-							.then(
-								function (workItem) {
-									open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + workItem.id);
-								},
-								function (err) {
-									console.log("ERROR: " + err.message);
-								});
-					}
-				},
-				function (err) {
-					console.log("ERROR: " + err.message);
-				});
+		if (this._vstsClient) {
+			// Get the list of queries from the "My Queries" folder
+			vscode.window.showQuickPick(this.queryWorkItemQueries())
+				.then(
+					function (query) {
+						if (query) {
+							// Execute the selected query and display the results
+							vscode.window.showQuickPick(_self.execWorkItemQuery(query.wiql))
+								.then(
+									function (workItem) {
+										open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + workItem.id);
+									},
+									function (err) {
+										console.log("ERROR: " + err.message);
+									});
+						}
+					},
+					function (err) {
+						console.log("ERROR: " + err.message);
+					});
+		}
 	}
 
 	private createWorkItem(title: string, workItemType: string): Promise<number> {
