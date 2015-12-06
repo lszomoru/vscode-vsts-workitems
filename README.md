@@ -44,7 +44,7 @@ You can also add the  ```vsts.workItemTypes``` optional setting to control the w
 ```
 
 ## Changelog
-### v0.0.2
+### v0.0.2 (2015-12-06)
 * Create new task from a single-line text selection (JavaScript, TypeScript, TypeScript React, C#). Using this feature you can easily convert comments into tasks. The link to the newly created task will be automatically injected into the editor.
 * Key bindings for each of the available commands
 * Configuration setting to filter work item types
