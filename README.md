@@ -30,6 +30,16 @@ In order for the extension to access your Visual Studio Team Servies account you
 }
 ```
 
+You can also add the  ```vsts.workItemTypes``` optional setting to control the work item types that can be created using Visual Studio Code, as well as the ```vsts.statusBarItemPriority``` optional setting to control the location of the status bar item (the greater the value the more left the item is displayed). 
+```
+	// Visual Studio Team Services work item types. (Ex: ["Bug", "Task"])
+	"vsts.workItemTypes": [],
+
+	// Priority of the status bar item. The higher the priority the more left the item is displayed.
+	"vsts.statusBarItemPriority": 99,
+
+```
+
 ## Changelog
 ### v0.0.2
 * Create new task from a single-line text selection (JavaScript, TypeScript, TypeScript React, C#). Using this feature you can easily convert comments into tasks. The link to the newly created task will be automatically injected into the editor.
