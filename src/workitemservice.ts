@@ -123,7 +123,7 @@ export class WorkItemService {
 							vscode.window.showQuickPick(_self.execWorkItemQuery(query.wiql))
 								.then(
 									function (workItem) {
-										open("https://" + this._vstsAccount + "/" + Constants.defaultCollectionName + "/" + this._vstsTeamProject + "/_workitems/edit/" + workItem.id);
+										open("https://" + _self._vstsAccount + "/" + Constants.defaultCollectionName + "/" + _self._vstsTeamProject + "/_workitems/edit/" + workItem.id);
 									},
 									function (err) {
 										console.log("ERROR: " + err.message);
