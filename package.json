@@ -4,7 +4,7 @@
 	"description": "Create/query/access Visual Studio Team Services work items from within Visual Studio Code.",
 	"keywords": ["VSO", "Visual Studio Online", "VSTS", "Visual Studio Team Services", "work item", "workitem", "work items", "workitems", "task", "tasks", "bug", "bugs"],
 	"icon": "assets/vsteam.png",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"publisher": "lszomoru",
 	"license": "MIT",
 	"bugs": {
