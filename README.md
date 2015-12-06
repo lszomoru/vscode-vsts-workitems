@@ -16,7 +16,7 @@ Execute a work item querie stored in the "My Queries" folder and open a work ite
 ![VSCode](assets/vscode3.png)
 
 ## Configuration 
-In order for the extension to access your Visual Studio Team Servies account you need to provide the account name, the team project name, and a [personal access token](https://www.visualstudio.com/en-us/news/2015-jul-7-vso.aspx) with "work items (read and write)" permission. After installing the extension, open your settings.json (type *Preferences: Open user settings* in the [command palette](https://code.visualstudio.com/Docs/editor/codebasics#_command-palette)) and add the following section and restart Visual Studio Code:
+In order for the extension to access your Visual Studio Team Servies account you need to provide the account name, the team project name, and a [personal access token](https://www.visualstudio.com/en-us/news/2015-jul-7-vso.aspx) with "work items (read and write)" permission. After installing the extension, and restarting Visual Studio Code, add the following section into your ```settings.json```:
 ```
 {
 	// Visual Studio Team Services account (Ex: contoso.visualstudio.com).
@@ -29,6 +29,29 @@ In order for the extension to access your Visual Studio Team Servies account you
 	"vsts.teamProject": ""
 }
 ```
+
+You can also add the  ```vsts.workItemTypes``` optional setting to control the work item types that can be created using Visual Studio Code, as well as the ```vsts.statusBarItemPriority``` optional setting to control the location of the status bar item (the greater the value the more left the item is displayed). 
+```
+	// Visual Studio Team Services work item types. (Ex: ["Bug", "Task"])
+	"vsts.workItemTypes": [],
+
+	// Priority of the status bar item. The higher the priority the more left the item is displayed.
+	"vsts.statusBarItemPriority": 99,
+
+```
+
+## Changelog
+### v0.0.2
+* Create new task from a single-line text selection (JavaScript, TypeScript, TypeScript React, C#). Using this feature you can easily convert comments into tasks. The link to the newly created task will be automatically injected into the editor.
+* Key bindings for each of the available commands
+* Configuration setting to filter work item types
+* Configuration setting to control status bar item ordering
+
+### v0.0.1 (2015-11-30)
+* Visual Studio Team Services account/team project indicator on the status bar
+* Open Visual Studio Team Services work items portal
+* Create new Visual Studio Team Services work item
+* Query Visual Studio Team Services work items
 
 ## License
 MIT. For more details check [LICENSE](LICENSE).
