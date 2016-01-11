@@ -234,7 +234,7 @@ export class WorkItemService {
 
 		// Add the details of the account and team project to the status bar
 		this._statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, priority);
-		this._statusBarItem.command = "extension.openVSTSPortal";
+		this._statusBarItem.command = "extension.openVSTSWorkItemsPortal";
 		this._statusBarItem.text = Icons.account + " " + this._vstsAccount.replace(".visualstudio.com", "") + " " + Icons.teamProject + " " + this._vstsTeamProject;
 		this._statusBarItem.show();
 
